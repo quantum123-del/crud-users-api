@@ -20,4 +20,11 @@ router.get('/:id', (req, res) => {
   res.json(user);
 });
 
+// POST /users - Créer un nouvel utilisateur
+router.post('/', (req, res) => {
+  const newUser = { id: users.length + 1, ...req.body };
+  users.push(newUser);
+  res.status(201).json(newUser);
+});
+
 module.exports = router;
