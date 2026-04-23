@@ -33,3 +33,12 @@ exports.deleteUser = (req, res) => {
   users.splice(userIndex, 1);
   res.status(204).send();
 };
+
+// PUT /users/:id - Modifier un utilisateur par ID
+exports.updateUser = (req, res) => {
+  const id = parseInt(req.params.id);
+  const userIndex = users.findIndex(u => u.id === id);
+  if (userIndex === -1) return res.status(404).json({ message: 'Utilisateur non trouvé' });
+  users[userIndex] = { ...users[userIndex], ...req.body };
+  res.json(users[userIndex]);
+};
