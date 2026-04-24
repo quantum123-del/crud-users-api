@@ -13,7 +13,10 @@ exports.getAllUsers = async (req, res) => {
     const { data, error } = await query;
     
     if (error) throw error;
-    res.json(data);
+    res.json({
+      message: 'Liste des utilisateurs récupérée avec succès',
+      data: data
+    });
   } catch (err) {
     res.status(500).json({ message: 'Erreur serveur', error: err.message });
   }
@@ -37,7 +40,10 @@ exports.getUserById = async (req, res) => {
     if (!data) {
       return res.status(404).json({ message: 'Utilisateur non trouvé' });
     }
-    res.json(data);
+    res.json({
+      message: 'Utilisateur récupéré avec succès',
+      data: data
+    });
   } catch (err) {
     if (err.message.includes('no rows')) {
       return res.status(404).json({ message: 'Utilisateur non trouvé' });
@@ -72,7 +78,10 @@ exports.createUser = async (req, res) => {
       .single();
     
     if (error) throw error;
-    res.status(201).json(data);
+    res.status(201).json({
+      message: 'Utilisateur créé avec succès',
+      data: data
+    });
   } catch (err) {
     res.status(500).json({ message: 'Erreur serveur', error: err.message });
   }
@@ -92,7 +101,7 @@ exports.deleteUser = async (req, res) => {
       .eq('id', id);
     
     if (error) throw error;
-    res.status(204).send();
+    res.status(200).json({ message: 'Utilisateur supprimé avec succès' });
   } catch (err) {
     res.status(500).json({ message: 'Erreur serveur', error: err.message });
   }
@@ -136,7 +145,10 @@ exports.updateUser = async (req, res) => {
     if (!data) {
       return res.status(404).json({ message: 'Utilisateur non trouvé' });
     }
-    res.json(data);
+    res.json({
+      message: 'Utilisateur mis à jour avec succès',
+      data: data
+    });
   } catch (err) {
     res.status(500).json({ message: 'Erreur serveur', error: err.message });
   }

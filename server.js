@@ -17,6 +17,9 @@ app.get('/', (req, res) => {
 // Routes utilisateurs
 app.use('/users', require('./routers/usersRouter'));
 
+// Routes authentification
+app.use('/auth', require('./routers/authRouter'));
+
 app.listen(PORT, () => {
   console.log(`Serveur lancé sur http://localhost:${PORT}`);
 });
