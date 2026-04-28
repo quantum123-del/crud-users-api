@@ -312,5 +312,3 @@ export const resetBackendStatus = () => {
 };
 
 export default api;
-
-export default api;
