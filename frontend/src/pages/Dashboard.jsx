@@ -11,6 +11,7 @@ const Dashboard = () => {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
   const [showModal, setShowModal] = useState(false);
   const [editingUser, setEditingUser] = useState(null);
   
@@ -69,6 +70,7 @@ const Dashboard = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+    setSuccess('');
 
     try {
       const userData = {
@@ -79,15 +81,20 @@ const Dashboard = () => {
       };
 
       if (editingUser) {
-        await updateUser(editingUser.id, userData);
+        const response = await updateUser(editingUser.id, userData);
+        setSuccess(response.message || 'Données modifiées avec succès!');
       } else {
-        await createUser(userData);
+        const response = await createUser(userData);
+        setSuccess(response.message || 'Données enregistrées avec succès!');
       }
 
       setShowModal(false);
       loadUsers();
+      
+      // Masquer le message après 3 secondes
+      setTimeout(() => setSuccess(''), 3000);
     } catch (err) {
-      setError(err.response?.data?.error || 'Erreur lors de la sauvegarde');
+      setError(err.response?.data?.error || err.response?.data?.message || 'Erreur lors de la sauvegarde');
     }
   };
 
@@ -127,6 +134,7 @@ const Dashboard = () => {
           </div>
 
           {error && <div className="error-message">{error}</div>}
+          {success && <div className="success-message">{success}</div>}
 
           {loading ? (
             <div className="loading">Chargement...</div>
