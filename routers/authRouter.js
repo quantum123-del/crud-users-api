@@ -3,12 +3,43 @@ const router = express.Router();
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 const supabase = require('../config/supabase');
+const fs = require('fs');
+const path = require('path');
 
 // Clé secrète pour JWT (en production, utiliser une variable d'environnement)
 const JWT_SECRET = process.env.JWT_SECRET || 'votre-secret-key-super-securise-2024';
 
-// Stockage local des utilisateurs (en mémoire pour le développement)
-const localUsers = new Map();
+// Fichier de stockage local
+const USERS_FILE = path.join(__dirname, '..', 'data', 'users.json');
+
+// Charger les utilisateurs depuis le fichier
+const loadUsers = () => {
+  try {
+    if (fs.existsSync(USERS_FILE)) {
+      const data = fs.readFileSync(USERS_FILE, 'utf8');
+      return new Map(JSON.parse(data));
+    }
+  } catch (err) {
+    console.error('Erreur chargement users:', err);
+  }
+  return new Map();
+};
+
+// Sauvegarder les utilisateurs dans le fichier
+const saveUsers = (users) => {
+  try {
+    const dir = path.dirname(USERS_FILE);
+    if (!fs.existsSync(dir)) {
+      fs.mkdirSync(dir, { recursive: true });
+    }
+    fs.writeFileSync(USERS_FILE, JSON.stringify([...users], null, 2));
+  } catch (err) {
+    console.error('Erreur sauvegarde users:', err);
+  }
+};
+
+// Stockage local des utilisateurs (persistent)
+let localUsers = loadUsers();
 
 // POST /auth/signup - Créer un nouvel utilisateur avec email et mot de passe
 router.post('/signup', async (req, res) => {
@@ -74,6 +105,9 @@ router.post('/signup', async (req, res) => {
         user,
         password: hashedPassword
       });
+      
+      // Sauvegarder les utilisateurs
+      saveUsers(localUsers);
       
       // Générer le token JWT
       const token = jwt.sign(
