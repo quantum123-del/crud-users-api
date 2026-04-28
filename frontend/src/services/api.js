@@ -313,22 +313,4 @@ export const resetBackendStatus = () => {
 
 export default api;
 
-// ============ FONCTIONS UTILITAIRES ============
-
-// Vérifier si l'utilisateur est connecté
-export const isAuthenticated = () => {
-  return !!localStorage.getItem('token');
-};
-
-// Obtenir le token
-export const getToken = () => {
-  return localStorage.getItem('token');
-};
-
-// Obtenir l'utilisateur depuis le localStorage
-export const getStoredUser = () => {
-  const user = localStorage.getItem('user');
-  return user ? JSON.parse(user) : null;
-};
-
 export default api;
