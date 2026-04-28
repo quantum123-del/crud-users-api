@@ -1,20 +1,25 @@
 const supabase = require('../config/supabase');
 
-// GET /users - Récupérer tous les utilisateurs avec filtrage par âge
+// GET /users - Récupérer les données de l'utilisateur connecté uniquement
 exports.getAllUsers = async (req, res) => {
   try {
-    let query = supabase.from('users').select('*');
+    // Récupérer l'email depuis le token JWT
+    const userEmail = req.user?.email;
     
-    if (req.query.age) {
-      const ages = Array.isArray(req.query.age) ? req.query.age.map(Number) : [Number(req.query.age)];
-      query = query.in('age', ages);
+    if (!userEmail) {
+      return res.status(401).json({ message: 'Non autorisé' });
     }
     
-    const { data, error } = await query;
+    // Récupérer uniquement les données de cet utilisateur
+    const { data, error } = await supabase
+      .from('users')
+      .select('*')
+      .eq('user_email', userEmail)
+      .order('created_at', { ascending: false });
     
     if (error) throw error;
     res.json({
-      message: 'Liste des utilisateurs récupérée avec succès',
+      message: 'Données récupérées avec succès',
       data: data
     });
   } catch (err) {
@@ -22,39 +27,49 @@ exports.getAllUsers = async (req, res) => {
   }
 };
 
-// GET /users/:id - Récupérer un utilisateur par ID
+// GET /users/:id - Récupérer une donnée par ID
 exports.getUserById = async (req, res) => {
   try {
-    const id = parseInt(req.params.id);
-    if (isNaN(id)) {
-      return res.status(400).json({ message: 'ID invalide' });
+    const id = req.params.id;
+    const userEmail = req.user?.email;
+    
+    if (!userEmail) {
+      return res.status(401).json({ message: 'Non autorisé' });
     }
     
     const { data, error } = await supabase
       .from('users')
       .select('*')
       .eq('id', id)
+      .eq('user_email', userEmail)
       .single();
     
     if (error) throw error;
     if (!data) {
-      return res.status(404).json({ message: 'Utilisateur non trouvé' });
+      return res.status(404).json({ message: 'Donnée non trouvée' });
     }
     res.json({
-      message: 'Utilisateur récupéré avec succès',
+      message: 'Donnée récupérée avec succès',
       data: data
     });
   } catch (err) {
     if (err.message.includes('no rows')) {
-      return res.status(404).json({ message: 'Utilisateur non trouvé' });
+      return res.status(404).json({ message: 'Donnée non trouvée' });
     }
     res.status(500).json({ message: 'Erreur serveur', error: err.message });
   }
 };
 
-// POST /users - Créer un nouvel utilisateur
+// POST /users - Créer une nouvelle donnée
 exports.createUser = async (req, res) => {
   try {
+    // Récupérer l'email depuis le token JWT
+    const userEmail = req.user?.email;
+    
+    if (!userEmail) {
+      return res.status(401).json({ message: 'Non autorisé' });
+    }
+    
     // Accepter les deux formats: {age, taille, sexe, poids} ou {name, age, height, gender, weight}
     const { age, taille, sexe, poids, name, height, gender, weight } = req.body;
     
@@ -81,6 +96,7 @@ exports.createUser = async (req, res) => {
     const { data, error } = await supabase
       .from('users')
       .insert([{ 
+        user_email: userEmail,
         age: userAge, 
         taille: userTaille, 
         sexe: userSexe.toUpperCase(), 
@@ -91,7 +107,7 @@ exports.createUser = async (req, res) => {
     
     if (error) throw error;
     res.status(201).json({
-      message: 'Utilisateur créé avec succès',
+      message: 'Données enregistrées avec succès! Un administrateur consultera vos informations.',
       data: data
     });
   } catch (err) {
@@ -99,32 +115,37 @@ exports.createUser = async (req, res) => {
   }
 };
 
-// DELETE /users/:id - Supprimer un utilisateur par ID
+// DELETE /users/:id - Supprimer une donnée par ID
 exports.deleteUser = async (req, res) => {
   try {
-    const id = parseInt(req.params.id);
-    if (isNaN(id)) {
-      return res.status(400).json({ message: 'ID invalide' });
+    const id = req.params.id;
+    const userEmail = req.user?.email;
+    
+    if (!userEmail) {
+      return res.status(401).json({ message: 'Non autorisé' });
     }
     
     const { error } = await supabase
       .from('users')
       .delete()
-      .eq('id', id);
+      .eq('id', id)
+      .eq('user_email', userEmail);
     
     if (error) throw error;
-    res.status(200).json({ message: 'Utilisateur supprimé avec succès' });
+    res.status(200).json({ message: 'Donnée supprimée avec succès' });
   } catch (err) {
     res.status(500).json({ message: 'Erreur serveur', error: err.message });
   }
 };
 
-// PUT /users/:id - Modifier un utilisateur par ID
+// PUT /users/:id - Modifier une donnée par ID
 exports.updateUser = async (req, res) => {
   try {
-    const id = parseInt(req.params.id);
-    if (isNaN(id)) {
-      return res.status(400).json({ message: 'ID invalide' });
+    const id = req.params.id;
+    const userEmail = req.user?.email;
+    
+    if (!userEmail) {
+      return res.status(401).json({ message: 'Non autorisé' });
     }
     
     // Accepter les deux formats
@@ -151,7 +172,7 @@ exports.updateUser = async (req, res) => {
     }
     
     // Construire l'objet de mise à jour
-    const updateData = {};
+    const updateData = { updated_at: new Date().toISOString() };
     if (userAge !== undefined) updateData.age = userAge;
     if (userTaille !== undefined) updateData.taille = userTaille;
     if (userSexe !== undefined) updateData.sexe = userSexe.toUpperCase();
@@ -161,15 +182,16 @@ exports.updateUser = async (req, res) => {
       .from('users')
       .update(updateData)
       .eq('id', id)
+      .eq('user_email', userEmail)
       .select()
       .single();
     
     if (error) throw error;
     if (!data) {
-      return res.status(404).json({ message: 'Utilisateur non trouvé' });
+      return res.status(404).json({ message: 'Donnée non trouvée' });
     }
     res.json({
-      message: 'Utilisateur mis à jour avec succès',
+      message: 'Donnée mise à jour avec succès',
       data: data
     });
   } catch (err) {
