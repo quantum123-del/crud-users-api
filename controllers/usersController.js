@@ -55,25 +55,37 @@ exports.getUserById = async (req, res) => {
 // POST /users - Créer un nouvel utilisateur
 exports.createUser = async (req, res) => {
   try {
-    const { age, taille, sexe, poids } = req.body;
+    // Accepter les deux formats: {age, taille, sexe, poids} ou {name, age, height, gender, weight}
+    const { age, taille, sexe, poids, name, height, gender, weight } = req.body;
+    
+    // Normaliser les champs
+    const userAge = age !== undefined ? age : (req.body.age ? parseInt(req.body.age) : undefined);
+    const userTaille = taille !== undefined ? taille : (height ? parseFloat(height) : undefined);
+    const userSexe = sexe !== undefined ? sexe : (gender ? (gender.toLowerCase() === 'homme' ? 'M' : gender.toLowerCase() === 'femme' ? 'F' : gender) : undefined);
+    const userPoids = poids !== undefined ? poids : (weight ? parseFloat(weight) : undefined);
     
     // Validation des champs requis
-    if (age === undefined || taille === undefined || sexe === undefined || poids === undefined) {
+    if (userAge === undefined || userTaille === undefined || userSexe === undefined || userPoids === undefined) {
       return res.status(400).json({ message: 'Tous les champs sont requis (age, taille, sexe, poids)' });
     }
     
     // Validation des types
-    if (typeof age !== 'number' || typeof taille !== 'number' || typeof poids !== 'number') {
+    if (typeof userAge !== 'number' || typeof userTaille !== 'number' || typeof userPoids !== 'number') {
       return res.status(400).json({ message: 'age, taille et poids doivent être des nombres' });
     }
     
-    if (typeof sexe !== 'string' || !['M', 'F'].includes(sexe.toUpperCase())) {
+    if (typeof userSexe !== 'string' || !['M', 'F'].includes(userSexe.toUpperCase())) {
       return res.status(400).json({ message: 'sexe doit être "M" ou "F"' });
     }
     
     const { data, error } = await supabase
       .from('users')
-      .insert([{ age, taille, sexe: sexe.toUpperCase(), poids }])
+      .insert([{ 
+        age: userAge, 
+        taille: userTaille, 
+        sexe: userSexe.toUpperCase(), 
+        poids: userPoids
+      }])
       .select()
       .single();
     
@@ -115,24 +127,35 @@ exports.updateUser = async (req, res) => {
       return res.status(400).json({ message: 'ID invalide' });
     }
     
-    const { age, taille, sexe, poids } = req.body;
+    // Accepter les deux formats
+    const { age, taille, sexe, poids, height, gender, weight } = req.body;
+    
+    // Normaliser les champs
+    const userAge = age !== undefined ? age : (req.body.age ? parseInt(req.body.age) : undefined);
+    const userTaille = taille !== undefined ? taille : (height ? parseFloat(height) : undefined);
+    const userSexe = sexe !== undefined ? sexe : (gender ? (gender.toLowerCase() === 'homme' ? 'M' : gender.toLowerCase() === 'femme' ? 'F' : gender) : undefined);
+    const userPoids = poids !== undefined ? poids : (weight ? parseFloat(weight) : undefined);
     
     // Validation des types si les champs sont présents
-    if (age !== undefined && typeof age !== 'number') {
+    if (userAge !== undefined && typeof userAge !== 'number') {
       return res.status(400).json({ message: 'age doit être un nombre' });
     }
-    if (taille !== undefined && typeof taille !== 'number') {
+    if (userTaille !== undefined && typeof userTaille !== 'number') {
       return res.status(400).json({ message: 'taille doit être un nombre' });
     }
-    if (poids !== undefined && typeof poids !== 'number') {
+    if (userPoids !== undefined && typeof userPoids !== 'number') {
       return res.status(400).json({ message: 'poids doit être un nombre' });
     }
-    if (sexe !== undefined && !['M', 'F'].includes(sexe.toUpperCase())) {
+    if (userSexe !== undefined && !['M', 'F'].includes(userSexe.toUpperCase())) {
       return res.status(400).json({ message: 'sexe doit être "M" ou "F"' });
     }
     
-    const updateData = { ...req.body };
-    if (sexe) updateData.sexe = sexe.toUpperCase();
+    // Construire l'objet de mise à jour
+    const updateData = {};
+    if (userAge !== undefined) updateData.age = userAge;
+    if (userTaille !== undefined) updateData.taille = userTaille;
+    if (userSexe !== undefined) updateData.sexe = userSexe.toUpperCase();
+    if (userPoids !== undefined) updateData.poids = userPoids;
     
     const { data, error } = await supabase
       .from('users')

@@ -1,7 +1,11 @@
 const express = require('express');
+const cors = require('cors');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+
+// Middleware CORS - Permet l'accès depuis tous les appareils
+app.use(cors());
 
 // Middleware pour parser le JSON
 app.use(express.json());
@@ -20,6 +24,7 @@ app.use('/users', require('./routers/usersRouter'));
 // Routes authentification
 app.use('/auth', require('./routers/authRouter'));
 
-app.listen(PORT, () => {
-  console.log(`Serveur lancé sur http://localhost:${PORT}`);
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`Serveur lancé sur http://0.0.0.0:${PORT}`);
+  console.log(`Accessible sur http://localhost:${PORT}`);
 });
