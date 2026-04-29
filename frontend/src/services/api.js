@@ -2,21 +2,18 @@
 import axios from 'axios';
 import localDB from './localDB';
 
-// URL de base de l'API backend - Détection automatique de l'IP
+// URL de base de l'API backend
 const getApiUrl = () => {
-  // En développement, utiliser l'IP de la machine hôte
+  // En développement local
   if (import.meta.env.DEV) {
-    // Essayer de détecter l'IP locale automatiquement
     const hostname = window.location.hostname;
     if (hostname === 'localhost' || hostname === '127.0.0.1') {
-      // Chercher l'IP locale
       return 'http://localhost:3000';
     }
-    // Si accès réseau (autre appareil), utiliser l'IP de la machine
     return `http://${hostname}:3000`;
   }
-  // En production
-  return '/api';
+  // En production - utiliser l'URL du backend déployé
+  return 'https://crud-users-api-1txy.onrender.com';
 };
 
 const API_URL = getApiUrl();
