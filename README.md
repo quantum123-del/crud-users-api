@@ -1,16 +1,25 @@
-# CRUD Users API - Application Autonome Complète
+# CRUD Users API - Application de Collecte de Données
 
 ## 🎯 Vue d'ensemble
 
-**CRUD Users API** est une application web full-stack pour la gestion des utilisateurs. Elle fonctionne de manière **entièrement autonome** - sans connexion Internet, sans serveur externe, avec un système d'authentification local.
+**CRUD Users API** est une application web full-stack pour la collecte de données utilisateurs. Chaque utilisateur peut saisir ses données (âge, taille, poids, sexe) et les visualiser. Les données sont stockées dans Supabase.
 
 ### Caractéristiques principales
 ✅ **Connexion/Inscription** - Authentification locale avec JWT et bcrypt  
-✅ **Gestion des utilisateurs** - CRUD complet (Créer, Lire, Mettre à jour, Supprimer)  
-✅ **Mode hors ligne** - Fonctionne sans connexion réseau  
-✅ **Persistance locale** - localStorage pour l'enregistrement des données  
+✅ **Collecte de données** - Saisie âge, taille, poids, sexe  
+✅ **Données personnelles** - Chaque utilisateur voit uniquement ses propres données  
+✅ **Confirmation** - Message de confirmation après chaque action  
 ✅ **Interface responsive** - Accessible sur desktop et mobile  
 ✅ **Sécurité** - Tokens JWT, mots de passe chiffrés
+
+---
+
+## 🌐 URLs de Production
+
+| Service | URL |
+|---------|-----|
+| **Application** | https://quantum123-del-crud-users-fkvy5zr0m-quantum123-dels-projects.vercel.app |
+| **API Backend** | https://crud-users-api-1txy.onrender.com |
 
 ---
 
@@ -26,14 +35,14 @@
 │  ├── Pages                   │    ├── Controllers      │
 │  ├── Components              │    ├── Routers          │
 │  ├── Services                │    ├── Middlewares      │
-│  └── LocalDB (localStorage)  │    └── Auth Service     │
+│  └── AuthContext             │    └── Auth Service     │
 │                              │                         │
 │             ↓ API HTTP ↓                               │
 │             (axios)                                    │
 │                                                         │
-│  Storage: localStorage (navigateur)                    │
+│  Storage: Supabase (base de données cloud)            │
 │  ────────────────────────────────────────────────────── │
-│  ✅ ENTIÈREMENT LOCAL - AUCUNE DÉPENDANCE EXTERNE     │
+│  ✅ STOCKAGE CLOUD - ACCESSIBLE DE PARTOUT            │
 └─────────────────────────────────────────────────────────┘
 ```
 
@@ -48,7 +57,7 @@
 | **JWT** | latest | Authentification tokens |
 | **bcrypt** | latest | Hachage des mots de passe |
 | **axios** | latest | Client HTTP |
-| **localStorage** | natif | Base de données locale |
+| **Supabase** | latest | Base de données cloud |
 
 ---
 
