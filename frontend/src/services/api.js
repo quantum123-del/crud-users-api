@@ -13,9 +13,8 @@ const getApiUrl = () => {
     return `http://${hostname}:3000`;
   }
   // En production - utiliser l'URL du backend déployé
-  return 'https://crud-users-api-1txy.onrender.com';
+  return 'https://crud-users-api-p077.onrender.com';
 };
-
 const API_URL = getApiUrl();
 
 // Créer une instance axios avec la configuration de base
